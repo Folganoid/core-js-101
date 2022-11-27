@@ -275,8 +275,18 @@ function reverseInteger(num) {
  *   5436468789016589 => false
  *   4916123456789012 => false
  */
-function isCreditCardNumber(/* ccn */) {
-  throw new Error('Not implemented');
+function isCreditCardNumber(ccn) {
+  const arr = String(ccn).split('');
+  for (let i = 0; i < arr.length; i = 1 + i) {
+    if (arr.length % 2 === 0 && (i === 0 || i % 2 === 0)) {
+      arr[i] = (+arr[i] * 2 > 9) ? (+arr[i] * 2) - 9 : +arr[i] * 2;
+    }
+    if (arr.length % 2 !== 0 && (i === 1 || i % 2 !== 0)) {
+      arr[i] = (+arr[i] * 2 > 9) ? (+arr[i] * 2) - 9 : +arr[i] * 2;
+    }
+  }
+  const sum = arr.reduce((a, b) => +a + +b);
+  return sum % 10 === 0;
 }
 
 /**
@@ -293,8 +303,9 @@ function isCreditCardNumber(/* ccn */) {
  *   10000 ( 1+0+0+0+0 = 1 ) => 1
  *   165536 (1+6+5+5+3+6 = 26,  2+6 = 8) => 8
  */
-function getDigitalRoot(/* num */) {
-  throw new Error('Not implemented');
+function getDigitalRoot(num) {
+  const fn = (a, b) => +a + +b;
+  return String(String(num).split('').reduce(fn)).split('').reduce(fn);
 }
 
 
@@ -319,8 +330,16 @@ function getDigitalRoot(/* num */) {
  *   '{)' = false
  *   '{[(<{[]}>)]}' = true
  */
-function isBracketsBalanced(/* str */) {
-  throw new Error('Not implemented');
+function isBracketsBalanced(str) {
+  const res = [];
+  str.split('').forEach((e) => {
+    if (e === '[' || e === '(' || e === '{' || e === '<') res.push(e);
+    if (e === ']' && res[res.length - 1] === '[') res.pop();
+    if (e === ')' && res[res.length - 1] === '(') res.pop();
+    if (e === '}' && res[res.length - 1] === '{') res.pop();
+    if (e === '>' && res[res.length - 1] === '<') res.pop();
+  });
+  return res.length === 0 && str.length % 2 === 0;
 }
 
 
@@ -344,8 +363,8 @@ function isBracketsBalanced(/* str */) {
  *    365, 4  => '11231'
  *    365, 10 => '365'
  */
-function toNaryString(/* num, n */) {
-  throw new Error('Not implemented');
+function toNaryString(num, n) {
+  return num.toString(n);
 }
 
 
@@ -361,8 +380,36 @@ function toNaryString(/* num, n */) {
  *   ['/web/assets/style.css', '/.bin/mocha',  '/read.me'] => '/'
  *   ['/web/favicon.ico', '/web-scripts/dump', '/verbalizer/logs'] => '/'
  */
-function getCommonDirectoryPath(/* pathes */) {
-  throw new Error('Not implemented');
+function getCommonDirectoryPath(pathes) {
+  let arr = pathes.map((e) => e.replace(/[0-9A-Za-z]+\..+$/i, ''));
+  arr = arr.sort((a, b) => {
+    if (a.length < b.length) {
+      return -1;
+    }
+    return 1;
+  });
+
+  let res = '';
+  let cnt = 0;
+  let stop = false;
+  for (let z = 0; z < arr[0].length; z = 1 + z) {
+    if (stop) break;
+    let same = true;
+    let compare = '';
+    for (let i = 0; i < arr.length; i = 1 + i) {
+      const char = arr[i].split('')[cnt];
+      if (i === 0) compare = char;
+
+      if (compare !== char) {
+        same = false;
+        stop = true;
+        break;
+      }
+    }
+    if (same) res += compare;
+    cnt = 1 + cnt;
+  }
+  return res.replace(/[a-zA-Z0-9]+$/, '');
 }
 
 
@@ -384,8 +431,27 @@ function getCommonDirectoryPath(/* pathes */) {
  *                         [ 6 ]]
  *
  */
-function getMatrixProduct(/* m1, m2 */) {
-  throw new Error('Not implemented');
+function getMatrixProduct(m1, m2) {
+  const rowsM1 = m1.length;
+  const colsM1 = m1[0].length;
+  const rowsM2 = m2.length;
+  const colsM2 = m2[0].length;
+  const res = [];
+
+  if (colsM1 !== rowsM2) return false;
+  for (let i = 0; i < rowsM1; i = 1 + i) {
+    res[i] = [];
+  }
+  for (let z = 0; z < colsM2; z = 1 + z) {
+    for (let i = 0; i < rowsM1; i = 1 + i) {
+      let temp = 0;
+      for (let j = 0; j < rowsM2; j = 1 + j) {
+        temp += m1[i][j] * m2[j][z];
+      }
+      res[i][z] = temp;
+    }
+  }
+  return res;
 }
 
 
@@ -419,8 +485,55 @@ function getMatrixProduct(/* m1, m2 */) {
  *    [    ,   ,    ]]
  *
  */
-function evaluateTicTacToePosition(/* position */) {
-  throw new Error('Not implemented');
+function evaluateTicTacToePosition(position) {
+  function checkDiagonal(char) {
+    let right = true;
+    let left = true;
+    for (let i = 0; i < position.length; i = 1 + i) {
+      if (right) right = (position[i][i] === char);
+      if (left) left = (position[position.length - i - 1][i] === char);
+      if (!left && !right) return false;
+    }
+    return char;
+  }
+
+  function checkRow(char, row) {
+    for (let i = 0; i < position.length; i = 1 + i) {
+      if (position[row][i] !== char) {
+        return false;
+      }
+    }
+    return char;
+  }
+
+  function checkCol(char, col) {
+    for (let i = 0; i < position.length; i = 1 + i) {
+      if (position[i][col] !== char) {
+        return false;
+      }
+    }
+    return char;
+  }
+
+  for (let i = 0; i < position.length; i = 1 + i) {
+    let col;
+    let row;
+    if (position[0][i]) {
+      col = checkCol(position[0][i], i);
+    }
+    if (position[i][0]) {
+      row = checkRow(position[i][0], i);
+    }
+    if (col || row) {
+      return col || row;
+    }
+  }
+
+  if (position[1][1]) {
+    const diagonal = checkDiagonal(position[1][1]);
+    if (diagonal) return diagonal;
+  }
+  return undefined;
 }
 
 
